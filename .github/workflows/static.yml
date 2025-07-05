@@ -2,64 +2,38 @@ name: 暗流
 
 on:
   push:
-    branches: [main] # 只在 main 分支推送时触
+    branches: [main] # 只在 main 分支推送时触发
 
 permissions:
-  contents: read
   pages: write
   id-token: write
 
-# 并发控制
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  build-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # 获取完整提交历史，有利于版本信息显示
-
+        
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        with:
-          # 启用单页应用(SPA)模式，解决路由刷新问题
-          enable-pages-single-page-app-mode: true
-
+        
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # 包含所有前端文件
-          path: '.'
+          path: '.' # 上传整个仓库
 
+  deploy:
+    needs: build
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          # 添加部署注释（包含触发提交信息）
-          comment: Deploy ${{ github.sha }} - ${{ github.event.head_commit.message }}
-
-  post-deploy:
-    runs-on: ubuntu-latest
-    needs: build-deploy
-    steps:
-      - name: Check deployment status
-        run: |
-          if [ "${{ needs.build-deploy.result }}" != "success" ]; then
-            echo "Deployment failed!"
-            exit 1
-          fi
-          
-      - name: Notify deployment
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: '${{ github.sha }}',
-              body: '🚀 Frontend deployed to: ${{ steps.deployment.outputs.page_url }}'
-            })
