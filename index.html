@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>暗流</title>
+  <title>暗流 - 智能钱包连接</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
@@ -316,6 +316,27 @@
       overflow: hidden;
       text-overflow: ellipsis;
       max-width: 70%;
+    }
+
+    .wallet-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: rgba(0, 184, 148, 0.1);
+      border: 1px solid rgba(0, 184, 148, 0.3);
+      font-size: 0.85rem;
+    }
+
+    .wallet-badge i {
+      font-size: 1rem;
+    }
+
+    .wallet-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
     }
 
     .records-container {
@@ -654,7 +675,12 @@
           <div class="card-title"><i class="fas fa-wallet"></i> 钱包连接</div>
         </div>
         <div class="wallet-info" id="walletInfo" style="display: none;">
-          <div>已连接钱包：<span class="address" id="walletAddress"></span></div>
+          <div>
+            已连接钱包：<span class="address" id="walletAddress"></span>
+            <div class="wallet-badge" id="walletBadge">
+              <i class="fab fa-ethereum"></i> <span id="walletName">未知钱包</span>
+            </div>
+          </div>
           <div>网络：<span id="networkInfo">BSC主网</span></div>
           <div>余额：<span id="balanceInfo">0 BNB</span></div>
         </div>
@@ -986,6 +1012,7 @@
     const disconnectWalletBtn = document.getElementById('disconnectWallet');
     const walletInfo = document.getElementById('walletInfo');
     const walletAddress = document.getElementById('walletAddress');
+    const walletName = document.getElementById('walletName');
     const networkInfo = document.getElementById('networkInfo');
     const balanceInfo = document.getElementById('balanceInfo');
     const platformSelect = document.getElementById('platform');
@@ -1007,6 +1034,7 @@
     let signer;
     let userAddress;
     let contract;
+    let currentWallet = null;
 
     // 初始化
     async function init() {
@@ -1020,13 +1048,118 @@
       amountInput.addEventListener('input', calculatePayment);
       createOrderBtn.addEventListener('click', createOrder);
 
-      // 初始化显示
-      updateUnit();
-
       // 尝试自动连接钱包
-      if (window.ethereum && window.ethereum.selectedAddress) {
-        await connectWallet();
+      await autoConnectWallet();
+    }
+
+    // 自动连接钱包
+    async function autoConnectWallet() {
+      const wallets = [
+        { name: "OKX Wallet", id: "okx", provider: window.okxwallet },
+        { name: "MetaMask", id: "metamask", provider: window.ethereum },
+        { name: "币安Web3钱包", id: "binance", provider: window.BinanceChain },
+        { name: "Trust钱包", id: "trust", provider: window.trustwallet }
+      ];
+
+      for (const wallet of wallets) {
+        if (wallet.provider && wallet.provider.selectedAddress) {
+          currentWallet = wallet;
+          await connectWithProvider(wallet.provider, wallet.name);
+          return;
+        }
       }
+    }
+
+    // 连接钱包（智能检测）
+    async function connectWallet() {
+      // 设置按钮状态
+      const originalText = connectWalletBtn.innerHTML;
+      connectWalletBtn.innerHTML = '<div class="loader"></div> 检测钱包...';
+      connectWalletBtn.disabled = true;
+
+      // 钱包检测优先级：OKX > MetaMask > 币安Web3钱包 > Trust钱包
+      let walletProvider = null;
+      let walletName = "未知钱包";
+
+      if (window.okxwallet) {
+        walletProvider = window.okxwallet;
+        walletName = "OKX Wallet";
+      } else if (window.ethereum) {
+        walletProvider = window.ethereum;
+        walletName = "MetaMask";
+      } else if (window.BinanceChain) {
+        walletProvider = window.BinanceChain;
+        walletName = "币安Web3钱包";
+      } else if (window.trustwallet) {
+        walletProvider = window.trustwallet;
+        walletName = "Trust钱包";
+      }
+
+      if (walletProvider) {
+        try {
+          await connectWithProvider(walletProvider, walletName);
+        } catch (error) {
+          alert(`连接钱包失败: ${error.message}`);
+        }
+      } else {
+        alert('未检测到可用钱包，请安装OKX、MetaMask、币安或Trust钱包');
+      }
+
+      // 恢复按钮状态
+      connectWalletBtn.innerHTML = originalText;
+      connectWalletBtn.disabled = false;
+    }
+
+    // 使用特定提供者连接钱包
+    async function connectWithProvider(walletProvider, name) {
+      try {
+        // 请求账户访问权限
+        const accounts = await walletProvider.request({ method: 'eth_requestAccounts' });
+
+        provider = new ethers.providers.Web3Provider(walletProvider);
+        signer = provider.getSigner();
+        userAddress = accounts[0];
+
+        // 初始化合约
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        // 更新UI
+        walletAddress.textContent = userAddress;
+        walletName.textContent = name;
+        walletInfo.style.display = 'flex';
+        connectWalletBtn.classList.add('hidden');
+        disconnectWalletBtn.classList.remove('hidden');
+
+        // 获取网络信息
+        const network = await provider.getNetwork();
+        networkInfo.textContent = network.name === "unknown" ? "BSC主网" : network.name;
+
+        // 获取余额
+        const balance = await provider.getBalance(userAddress);
+        balanceInfo.textContent = ethers.utils.formatEther(balance).substring(0, 6) + " BNB";
+
+        console.log(`${name} 钱包已连接:`, userAddress);
+      } catch (error) {
+        console.error('连接钱包失败:', error);
+        alert('连接钱包失败: ' + error.message);
+      }
+    }
+
+    // 断开钱包连接
+    function disconnectWallet() {
+      userAddress = null;
+      signer = null;
+      provider = null;
+      contract = null;
+      currentWallet = null;
+
+      // 更新UI
+      walletInfo.style.display = 'none';
+      connectWalletBtn.classList.remove('hidden');
+      disconnectWalletBtn.classList.add('hidden');
+      createOrderBtn.disabled = true;
+
+      console.log('钱包已断开连接');
     }
 
     // 更新单位显示
@@ -1126,62 +1259,6 @@
       orderStatusDisplay.textContent = "可以下单";
       orderStatusDisplay.style.color = "#00b894";
       createOrderBtn.disabled = false;
-    }
-
-    // 连接钱包
-    async function connectWallet() {
-      try {
-        // 检测钱包扩展
-        if (typeof window.ethereum === 'undefined') {
-          alert('请安装MetaMask或OKX Wallet以使用此功能');
-          return;
-        }
-
-        // 请求账户访问权限
-        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-
-        provider = new ethers.providers.Web3Provider(window.ethereum);
-        signer = provider.getSigner();
-        userAddress = accounts[0];
-
-        // 初始化合约
-        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-        // 更新UI
-        walletAddress.textContent = userAddress;
-        walletInfo.style.display = 'flex';
-        connectWalletBtn.classList.add('hidden');
-        disconnectWalletBtn.classList.remove('hidden');
-
-        // 获取网络信息
-        const network = await provider.getNetwork();
-        networkInfo.textContent = network.name === "unknown" ? "BSC主网" : network.name;
-
-        // 获取余额
-        const balance = await provider.getBalance(userAddress);
-        balanceInfo.textContent = ethers.utils.formatEther(balance).substring(0, 6) + " BNB";
-
-        console.log('钱包已连接:', userAddress);
-      } catch (error) {
-        console.error('连接钱包失败:', error);
-        alert('连接钱包失败: ' + error.message);
-      }
-    }
-
-    // 断开钱包连接
-    function disconnectWallet() {
-      userAddress = null;
-      signer = null;
-      provider = null;
-      contract = null;
-
-      // 更新UI
-      walletInfo.style.display = 'none';
-      connectWalletBtn.classList.remove('hidden');
-      disconnectWalletBtn.classList.add('hidden');
-      createOrderBtn.disabled = true;
-
-      console.log('钱包已断开连接');
     }
 
     // 创建订单
