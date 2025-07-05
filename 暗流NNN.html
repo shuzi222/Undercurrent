@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社交平台推广服务系统 - 客户界面</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1e1e2e;
+      --secondary: #2d2d44;
+      --accent: #00b894;
+      --accent-dark: #009d7a;
+      --text: #f8f9fa;
+      --text-secondary: #adb5bd;
+      --success: #28a745;
+      --danger: #dc3545;
+      --card-bg: #252536;
+      --card-border: #3a3a5a;
+      --bilibili: #fb7299;
+      --douyin: #ff0050;
+      --kuaishou: #ff6b00;
+      --warning: #ffc107;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, var(--primary), #12121f);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: rgba(45, 45, 68, 0.6);
+      border-radius: 15px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--card-border);
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      color: var(--accent);
+      text-shadow: 0 0 10px rgba(0, 184, 148, 0.3);
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      margin-bottom: 20px;
+    }
+
+    .card-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    @media (min-width: 992px) {
+      .card-container {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--card-border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      color: var(--accent);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .card-title i {
+      font-size: 1.3rem;
+    }
+
+    .tab-container {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 12px;
+      text-align: center;
+      background: var(--secondary);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: bold;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: var(--primary);
+    }
+
+    .tab:hover:not(.active) {
+      background: #3a3a5a;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .input-container {
+      display: flex;
+      align-items: center;
+      background: var(--secondary);
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+
+    .select-wrapper {
+      position: relative;
+      width: 100%;
+    }
+
+    .select-wrapper select {
+      width: 100%;
+      padding: 14px 40px 14px 15px;
+      background: var(--secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 1.1rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .select-wrapper::after {
+      content: "▼";
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+      pointer-events: none;
+      font-size: 0.8rem;
+    }
+
+    select option {
+      background: var(--secondary);
+      color: var(--text);
+      padding: 10px;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.3);
+    }
+
+    input,
+    textarea {
+      flex: 1;
+      padding: 14px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 1.1rem;
+      width: 100%;
+      resize: vertical;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+    }
+
+    .token-symbol {
+      padding: 0 15px;
+      background: rgba(0, 184, 148, 0.1);
+      color: var(--accent);
+      height: 100%;
+      display: flex;
+      align-items: center;
+      font-weight: bold;
+      border-radius: 0 10px 10px 0;
+    }
+
+    .info-box {
+      background: rgba(45, 45, 68, 0.6);
+      padding: 15px;
+      border-radius: 10px;
+      margin: 15px 0;
+      font-size: 0.9rem;
+      border: 1px solid var(--card-border);
+    }
+
+    .info-box p {
+      margin: 8px 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .info-box span.value {
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      background: var(--accent);
+      color: var(--primary);
+      border: none;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    button:hover {
+      background: var(--accent-dark);
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+      transform: none;
+      opacity: 0.7;
+    }
+
+    .connect-btn {
+      background: var(--success);
+      color: white;
+      margin-top: 0;
+    }
+
+    .disconnect-btn {
+      background: var(--danger);
+      color: white;
+      margin-top: 10px;
+    }
+
+    .wallet-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--secondary);
+      padding: 12px 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .address {
+      font-family: monospace;
+      color: var(--accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 70%;
+    }
+
+    .records-container {
+      margin-top: 30px;
+    }
+
+    .records-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .record-list {
+      background: var(--card-bg);
+      border-radius: 10px;
+      border: 1px solid var(--card-border);
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .record-item {
+      padding: 15px;
+      border-bottom: 1px solid var(--card-border);
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .record-item:last-child {
+      border-bottom: none;
+    }
+
+    .record-header {
+      font-weight: bold;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px 8px 0 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .record-type {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      text-align: center;
+      display: inline-block;
+    }
+
+    .bilibili {
+      background: rgba(251, 114, 153, 0.15);
+      color: var(--bilibili);
+      border: 1px solid rgba(251, 114, 153, 0.3);
+    }
+
+    .douyin {
+      background: rgba(255, 0, 80, 0.15);
+      color: var(--douyin);
+      border: 1px solid rgba(255, 0, 80, 0.3);
+    }
+
+    .kuaishou {
+      background: rgba(255, 107, 0, 0.15);
+      color: var(--kuaishou);
+      border: 1px solid rgba(255, 107, 0, 0.3);
+    }
+
+    .record-details {
+      text-align: center;
+      padding: 5px;
+    }
+
+    .record-amount {
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .record-timestamp {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .payment-bnb {
+      color: #f0b90b;
+    }
+
+    .payment-usdt {
+      color: #00ac78;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loader {
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 3px solid var(--accent);
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .platform-icon {
+      width: 24px;
+      height: 24px;
+      display: inline-block;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .tabs-container {
+      display: flex;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--card-border);
+      justify-content: center;
+    }
+
+    .view-tab {
+      padding: 12px 24px;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .view-tab.active {
+      border-bottom: 3px solid var(--accent);
+      color: var(--accent);
+    }
+
+    .view-tab:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      margin-left: 8px;
+    }
+
+    .status-success {
+      background: rgba(40, 167, 69, 0.2);
+      color: #28a745;
+    }
+
+    .status-pending {
+      background: rgba(255, 193, 7, 0.2);
+      color: #ffc107;
+    }
+
+    .status-failed {
+      background: rgba(220, 53, 69, 0.2);
+      color: #dc3545;
+    }
+
+    .system-notice {
+      background: rgba(0, 184, 148, 0.1);
+      border-left: 4px solid var(--accent);
+      padding: 15px;
+      border-radius: 0 8px 8px 0;
+      margin: 20px 0;
+    }
+
+    .system-notice p {
+      margin: 5px 0;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .system-notice i {
+      margin-top: 3px;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 15px;
+      color: var(--accent);
+    }
+
+    .admin-login {
+      text-align: center;
+      margin: 30px auto;
+      max-width: 400px;
+      padding: 20px;
+      background: var(--card-bg);
+      border-radius: 15px;
+      border: 1px solid var(--card-border);
+    }
+
+    .admin-login h2 {
+      margin-bottom: 20px;
+      color: var(--accent);
+    }
+
+    .admin-login input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 15px;
+      background: var(--secondary);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      color: var(--text);
+    }
+
+    .admin-login button {
+      margin-top: 10px;
+    }
+
+    .video-url {
+      font-size: 0.9rem;
+      color: var(--accent);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    .admin-action {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .admin-action button {
+      flex: 1;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      .card {
+        padding: 20px;
+      }
+
+      .wallet-info {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+      }
+
+      .address {
+        max-width: 100%;
+      }
+
+      .record-item {
+        grid-template-columns: 1fr;
+        gap: 15px;
+        text-align: left;
+      }
+
+      .record-header {
+        display: none;
+      }
+
+      .record-details {
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+      }
+
+      .record-details::before {
+        content: attr(data-label);
+        font-weight: bold;
+        color: var(--text-secondary);
+        margin-bottom: 5px;
+      }
+
+      .view-tab {
+        padding: 10px 15px;
+        font-size: 0.9rem;
+      }
+
+      .admin-action {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-rocket"></i> 暗流- B抖快匿名推广服务系统</h1>
+      <div class="subtitle">专业提升您的视频播放量与点赞数 - 安全、高效、透明</div>
+    </header>
+
+    <div id="customerView">
+      <div class="tabs-container">
+        <div class="view-tab active" data-tab="customer">下单</div>
+      </div>
+    </div>
+
+    <div class="system-notice">
+      <p><i class="fas fa-info-circle"></i> 系统提示：所有订单通过区块链提交，下单后不可追溯下单者，请明确指定视频链接，否则订单视为无效</p>
+      <p><i class="fas fa-exclamation-triangle"></i> 请确保订单数量符合要求，不要尝试使用非法提交（会被退款，浪费gas）</p>
+    </div>
+
+    <div class="card-container">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-wallet"></i> 钱包连接</div>
+        </div>
+        <div class="wallet-info" id="walletInfo" style="display: none;">
+          <div>已连接钱包：<span class="address" id="walletAddress"></span></div>
+          <div>网络：<span id="networkInfo">BSC主网</span></div>
+          <div>余额：<span id="balanceInfo">0 BNB</span></div>
+        </div>
+        <button id="connectWallet" class="connect-btn">
+          <i class="fas fa-plug"></i> 连接钱包
+        </button>
+        <button id="disconnectWallet" class="disconnect-btn hidden">
+          <i class="fas fa-power-off"></i> 断开连接
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><i class="fas fa-shopping-cart"></i> 创建推广订单</div>
+        </div>
+
+        <div class="input-group">
+          <label><i class="fas fa-tv"></i> 选择平台</label>
+          <div class="select-wrapper">
+            <select id="platform">
+              <option value="" disabled selected>请选择平台</option>
+              <option value="bilibili">B站</option>
+              <option value="douyin">抖音</option>
+              <option value="kuaishou">快手</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label><i class="fas fa-chart-line"></i> 选择推广类型</label>
+          <div class="select-wrapper">
+            <select id="orderType">
+              <option value="" disabled selected>请选择类型</option>
+              <option value="play">播放量</option>
+              <option value="like">点赞数</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label><i class="fas fa-hashtag"></i> 输入数量</label>
+          <div class="input-container">
+            <input type="number" id="amount" placeholder="请输入数量" min="0">
+            <div class="token-symbol" id="unitDisplay">个</div>
+          </div>
+          <div class="info-box">
+            <p>最小下单量: <span class="value" id="minAmount">1000个</span></p>
+            <p>基本单位: <span class="value" id="unitInfo">1000个</span></p>
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label><i class="fas fa-link"></i> 视频链接</label>
+          <div class="input-container">
+            <input type="text" id="videoUrl" placeholder="请输入视频链接">
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label><i class="fas fa-coins"></i> 选择支付代币</label>
+          <div class="select-wrapper">
+            <select id="paymentToken">
+              <option value="" disabled selected>请选择支付方式</option>
+              <option value="bnb">BNB</option>
+              <option value="usdt">USDT</option>
+            </select>
+          </div>
+          <div class="info-box" id="likeWarning" style="display: none;">
+            <p style="color: #ff6b6b;"><i class="fas fa-exclamation-circle"></i> 注意：点赞订单仅支持BNB支付！</p>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <p>所需支付金额: <span class="value" id="paymentAmount">0</span> <span id="paymentTokenDisplay">BNB</span></p>
+          <p>订单状态: <span id="orderStatus">等待输入</span></p>
+        </div>
+
+        <button id="createOrderBtn" disabled>
+          <i class="fas fa-paper-plane"></i> 创建订单
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 智能合约地址（部署后更新此处）
+    const CONTRACT_ADDRESS = "0xYourContractAddressHere";
+
+    // 智能合约ABI
+    const CONTRACT_ABI = [
+      {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "orderId",
+            "type": "uint256"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          }
+        ],
+        "name": "OrderCreated",
+        "type": "event"
+      },
+      {
+        "inputs": [],
+        "name": "USDT_ADDRESS",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "enum SocialMediaOrder.Platform",
+            "name": "platform",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum SocialMediaOrder.Type",
+            "name": "orderType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum SocialMediaOrder.PaymentToken",
+            "name": "paymentToken",
+            "type": "uint8"
+          },
+          {
+            "internalType": "string",
+            "name": "videoUrl",
+            "type": "string"
+          }
+        ],
+        "name": "createOrder",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "developer",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "getAllOrders",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+              },
+              {
+                "internalType": "enum SocialMediaOrder.Platform",
+                "name": "platform",
+                "type": "uint8"
+              },
+              {
+                "internalType": "enum SocialMediaOrder.Type",
+                "name": "orderType",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "amount",
+                "type": "uint256"
+              },
+              {
+                "internalType": "enum SocialMediaOrder.PaymentToken",
+                "name": "paymentToken",
+                "type": "uint8"
+              },
+              {
+                "internalType": "uint256",
+                "name": "payment",
+                "type": "uint256"
+              },
+              {
+                "internalType": "uint256",
+                "name": "timestamp",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "videoUrl",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct SocialMediaOrder.Order[]",
+            "name": "",
+            "type": "tuple[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "nextIndex",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "name": "orders",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "user",
+            "type": "address"
+          },
+          {
+            "internalType": "enum SocialMediaOrder.Platform",
+            "name": "platform",
+            "type": "uint8"
+          },
+          {
+            "internalType": "enum SocialMediaOrder.Type",
+            "name": "orderType",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "amount",
+            "type": "uint256"
+          },
+          {
+            "internalType": "enum SocialMediaOrder.PaymentToken",
+            "name": "paymentToken",
+            "type": "uint8"
+          },
+          {
+            "internalType": "uint256",
+            "name": "payment",
+            "type": "uint256"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "videoUrl",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ];
+
+    const PRICES = {
+      bilibili: {
+        play: { bnb: 0.007, usdt: 3.5, unit: 1000, min: 1000 },
+        like: { bnb: 0.001, usdt: 0, unit: 10, min: 10 }
+      },
+      douyin: {
+        play: { bnb: 0.0075, usdt: 3.5, unit: 1000, min: 1000 },
+        like: { bnb: 0.002, usdt: 0, unit: 10, min: 10 }
+      },
+      kuaishou: {
+        play: { bnb: 0.003, usdt: 2, unit: 10000, min: 10000 },
+        like: { bnb: 0.001, usdt: 0, unit: 10, min: 10 }
+      }
+    };
+
+    // 平台信息
+    const PLATFORM_INFO = {
+      bilibili: { name: "B站", color: "bilibili", icon: "fas fa-play-circle" },
+      douyin: { name: "抖音", color: "douyin", icon: "fas fa-music" },
+      kuaishou: { name: "快手", color: "kuaishou", icon: "fas fa-bolt" }
+    };
+
+    // 类型信息
+    const TYPE_INFO = {
+      play: { name: "播放量", icon: "fas fa-eye" },
+      like: { name: "点赞数", icon: "fas fa-thumbs-up" }
+    };
+
+    // DOM元素
+    const customerView = document.getElementById('customerView');
+    const connectWalletBtn = document.getElementById('connectWallet');
+    const disconnectWalletBtn = document.getElementById('disconnectWallet');
+    const walletInfo = document.getElementById('walletInfo');
+    const walletAddress = document.getElementById('walletAddress');
+    const networkInfo = document.getElementById('networkInfo');
+    const balanceInfo = document.getElementById('balanceInfo');
+    const platformSelect = document.getElementById('platform');
+    const orderTypeSelect = document.getElementById('orderType');
+    const amountInput = document.getElementById('amount');
+    const videoUrlInput = document.getElementById('videoUrl');
+    const unitDisplay = document.getElementById('unitDisplay');
+    const minAmountDisplay = document.getElementById('minAmount');
+    const unitInfoDisplay = document.getElementById('unitInfo');
+    const paymentTokenSelect = document.getElementById('paymentToken');
+    const likeWarning = document.getElementById('likeWarning');
+    const paymentAmountDisplay = document.getElementById('paymentAmount');
+    const paymentTokenDisplay = document.getElementById('paymentTokenDisplay');
+    const orderStatusDisplay = document.getElementById('orderStatus');
+    const createOrderBtn = document.getElementById('createOrderBtn');
+
+    // 全局变量
+    let provider;
+    let signer;
+    let userAddress;
+    let contract;
+
+    // 初始化
+    async function init() {
+      // 设置事件监听器
+      connectWalletBtn.addEventListener('click', connectWallet);
+      disconnectWalletBtn.addEventListener('click', disconnectWallet);
+
+      platformSelect.addEventListener('change', updateUnit);
+      orderTypeSelect.addEventListener('change', updateUnit);
+      paymentTokenSelect.addEventListener('change', updatePaymentToken);
+      amountInput.addEventListener('input', calculatePayment);
+      createOrderBtn.addEventListener('click', createOrder);
+
+      // 初始化显示
+      updateUnit();
+
+      // 尝试自动连接钱包
+      if (window.ethereum && window.ethereum.selectedAddress) {
+        await connectWallet();
+      }
+    }
+
+    // 更新单位显示
+    function updateUnit() {
+      const platform = platformSelect.value;
+      const orderType = orderTypeSelect.value;
+
+      if (!platform || !orderType) return;
+
+      const unit = PRICES[platform][orderType].unit;
+      const min = PRICES[platform][orderType].min;
+
+      unitDisplay.textContent = `每${unit}个`;
+      minAmountDisplay.textContent = `${min}个`;
+      unitInfoDisplay.textContent = `${unit}个`;
+      amountInput.placeholder = `请输入${unit}的倍数`;
+
+      // 更新点赞警告
+      if (orderType === 'like') {
+        likeWarning.style.display = 'block';
+        paymentTokenSelect.value = 'bnb';
+        paymentTokenSelect.disabled = true;
+      } else {
+        likeWarning.style.display = 'none';
+        paymentTokenSelect.disabled = false;
+      }
+
+      calculatePayment();
+    }
+
+    // 更新支付代币显示
+    function updatePaymentToken() {
+      paymentTokenDisplay.textContent = paymentTokenSelect.value ? paymentTokenSelect.value.toUpperCase() : '';
+      calculatePayment();
+    }
+
+    // 计算支付金额
+    function calculatePayment() {
+      const platform = platformSelect.value;
+      const orderType = orderTypeSelect.value;
+      const amount = parseInt(amountInput.value) || 0;
+      const paymentToken = paymentTokenSelect.value;
+
+      if (!platform || !orderType || !paymentToken) {
+        paymentAmountDisplay.textContent = "0";
+        orderStatusDisplay.textContent = "请选择平台和类型";
+        orderStatusDisplay.style.color = "";
+        createOrderBtn.disabled = true;
+        return;
+      }
+
+      if (amount <= 0) {
+        paymentAmountDisplay.textContent = "0";
+        orderStatusDisplay.textContent = "等待输入";
+        orderStatusDisplay.style.color = "";
+        createOrderBtn.disabled = true;
+        return;
+      }
+
+      const priceConfig = PRICES[platform][orderType];
+      const unit = priceConfig.unit;
+      const min = priceConfig.min;
+
+      // 检查最小数量
+      if (amount < min) {
+        paymentAmountDisplay.textContent = "无效数量";
+        orderStatusDisplay.textContent = `最小下单量为${min}个`;
+        orderStatusDisplay.style.color = "#ff6b6b";
+        createOrderBtn.disabled = true;
+        return;
+      }
+
+      // 检查数量是否为单位的倍数
+      if (amount % unit !== 0) {
+        paymentAmountDisplay.textContent = "无效数量";
+        orderStatusDisplay.textContent = "数量必须为" + unit + "的倍数";
+        orderStatusDisplay.style.color = "#ff6b6b";
+        createOrderBtn.disabled = true;
+        return;
+      }
+
+      // 检查点赞订单是否使用BNB
+      if (orderType === 'like' && paymentToken !== 'bnb') {
+        paymentAmountDisplay.textContent = "无效支付";
+        orderStatusDisplay.textContent = "点赞订单必须使用BNB支付";
+        orderStatusDisplay.style.color = "#ff6b6b";
+        createOrderBtn.disabled = true;
+        return;
+      }
+
+      // 计算价格
+      const units = amount / unit;
+      const pricePerUnit = priceConfig[paymentToken];
+      const totalPayment = units * pricePerUnit;
+
+      paymentAmountDisplay.textContent = totalPayment.toFixed(6);
+      orderStatusDisplay.textContent = "可以下单";
+      orderStatusDisplay.style.color = "#00b894";
+      createOrderBtn.disabled = false;
+    }
+
+    // 连接钱包
+    async function connectWallet() {
+      try {
+        // 检测钱包扩展
+        if (typeof window.ethereum === 'undefined') {
+          alert('请安装MetaMask或OKX Wallet以使用此功能');
+          return;
+        }
+
+        // 请求账户访问权限
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        userAddress = accounts[0];
+
+        // 初始化合约
+        contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        // 更新UI
+        walletAddress.textContent = userAddress;
+        walletInfo.style.display = 'flex';
+        connectWalletBtn.classList.add('hidden');
+        disconnectWalletBtn.classList.remove('hidden');
+
+        // 获取网络信息
+        const network = await provider.getNetwork();
+        networkInfo.textContent = network.name === "unknown" ? "BSC主网" : network.name;
+
+        // 获取余额
+        const balance = await provider.getBalance(userAddress);
+        balanceInfo.textContent = ethers.utils.formatEther(balance).substring(0, 6) + " BNB";
+
+        console.log('钱包已连接:', userAddress);
+      } catch (error) {
+        console.error('连接钱包失败:', error);
+        alert('连接钱包失败: ' + error.message);
+      }
+    }
+
+    // 断开钱包连接
+    function disconnectWallet() {
+      userAddress = null;
+      signer = null;
+      provider = null;
+      contract = null;
+
+      // 更新UI
+      walletInfo.style.display = 'none';
+      connectWalletBtn.classList.remove('hidden');
+      disconnectWalletBtn.classList.add('hidden');
+      createOrderBtn.disabled = true;
+
+      console.log('钱包已断开连接');
+    }
+
+    // 创建订单
+    async function createOrder() {
+      const platform = platformSelect.value;
+      const orderType = orderTypeSelect.value;
+      const amount = parseInt(amountInput.value);
+      const paymentToken = paymentTokenSelect.value;
+      const videoUrl = videoUrlInput.value;
+
+      if (!platform || !orderType || !amount || amount <= 0) {
+        alert('请输入有效的订单信息');
+        return;
+      }
+
+      if (!videoUrl) {
+        alert('请输入视频链接');
+        return;
+      }
+
+      try {
+        // 设置按钮状态
+        createOrderBtn.innerHTML = '<div class="loader"></div> 处理中...';
+        createOrderBtn.disabled = true;
+
+        // 计算支付金额
+        const priceConfig = PRICES[platform][orderType];
+        const unit = priceConfig.unit;
+        const units = amount / unit;
+        const paymentAmount = units * priceConfig[paymentToken];
+
+        // 显示交易状态
+        orderStatusDisplay.textContent = "交易已提交，等待确认...";
+        orderStatusDisplay.style.color = "#ffc107";
+
+        // 映射前端值到合约枚举
+        const platformEnum =
+          platform === 'bilibili' ? 0 :
+            platform === 'douyin' ? 1 : 2;
+
+        const typeEnum =
+          orderType === 'play' ? 0 : 1;
+
+        const paymentTokenEnum =
+          paymentToken === 'bnb' ? 0 : 1;
+
+        // 计算支付金额（转换为wei）
+        const paymentValue = paymentToken === 'bnb' ?
+          ethers.utils.parseEther(paymentAmount.toString()) :
+          ethers.utils.parseUnits(paymentAmount.toString(), 6); // USDT使用6位小数
+
+        let tx;
+        if (paymentToken === 'bnb') {
+          // BNB支付
+          tx = await contract.createOrder(
+            platformEnum,
+            typeEnum,
+            amount,
+            paymentTokenEnum,
+            videoUrl,
+            { value: paymentValue }
+          );
+        } else {
+          // USDT支付 - 需要先授权
+          const usdtAddress = await contract.USDT_ADDRESS();
+          const usdtContract = new ethers.Contract(usdtAddress, [
+            "function approve(address spender, uint256 amount) public returns (bool)",
+            "function allowance(address owner, address spender) public view returns (uint256)"
+          ], signer);
+
+          // 检查当前授权额度
+          const currentAllowance = await usdtContract.allowance(userAddress, CONTRACT_ADDRESS);
+          if (currentAllowance.lt(paymentValue)) {
+            // 需要授权
+            const approveTx = await usdtContract.approve(CONTRACT_ADDRESS, paymentValue);
+            await approveTx.wait();
+          }
+
+          // 创建订单
+          tx = await contract.createOrder(
+            platformEnum,
+            typeEnum,
+            amount,
+            paymentTokenEnum,
+            videoUrl
+          );
+        }
+
+        // 等待交易确认
+        const receipt = await tx.wait();
+
+        if (receipt.status === 1) {
+          orderStatusDisplay.textContent = "订单创建成功！";
+          orderStatusDisplay.style.color = "#00b894";
+
+          // 显示成功消息
+          alert(`订单创建成功！\n\n平台: ${PLATFORM_INFO[platform].name}\n类型: ${TYPE_INFO[orderType].name}\n数量: ${amount}\n视频链接: ${videoUrl}\n支付: ${paymentAmount} ${paymentToken.toUpperCase()}`);
+        } else {
+          throw new Error("交易失败");
+        }
+      } catch (error) {
+        console.error('创建订单失败:', error);
+        orderStatusDisplay.textContent = "订单创建失败: " + (error.reason || error.message);
+        orderStatusDisplay.style.color = "#ff6b6b";
+        alert(`订单创建失败: ${error.reason || error.message}`);
+      } finally {
+        // 重置按钮状态
+        createOrderBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 创建订单';
+        createOrderBtn.disabled = false;
+
+        // 清除输入
+        amountInput.value = '';
+        videoUrlInput.value = '';
+        calculatePayment();
+
+        // 延迟重置状态
+        setTimeout(() => {
+          orderStatusDisplay.textContent = "等待输入";
+          orderStatusDisplay.style.color = "";
+        }, 5000);
+      }
+    }
+
+    // 页面加载时初始化
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+
+</html>
