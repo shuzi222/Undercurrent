@@ -147,6 +147,7 @@
 
     .input-group {
       margin-bottom: 20px;
+      position: relative;
     }
 
     label {
@@ -165,46 +166,70 @@
       border: 1px solid var(--card-border);
     }
 
-    .select-wrapper {
+    /* 自定义下拉菜单样式 */
+    .custom-select {
       position: relative;
       width: 100%;
     }
 
-    .select-wrapper select {
-      width: 100%;
+    .select-header {
       padding: 14px 40px 14px 15px;
       background: var(--secondary);
       border: 1px solid var(--card-border);
       border-radius: 10px;
       color: var(--text);
       font-size: 1.1rem;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      appearance: none;
       cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
 
-    .select-wrapper::after {
-      content: "▼";
+    .select-header i {
+      transition: transform 0.3s ease;
+    }
+
+    .select-header.open i {
+      transform: rotate(180deg);
+    }
+
+    .select-options {
       position: absolute;
-      right: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: var(--text-secondary);
-      pointer-events: none;
-      font-size: 0.8rem;
-    }
-
-    select option {
+      top: 100%;
+      left: 0;
+      right: 0;
       background: var(--secondary);
-      color: var(--text);
-      padding: 10px;
+      border: 1px solid var(--card-border);
+      border-radius: 0 0 10px 10px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+      display: none;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
     }
 
-    select:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 2px rgba(0, 184, 148, 0.3);
+    .select-options.open {
+      display: block;
+    }
+
+    .select-option {
+      padding: 12px 15px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .select-option:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .select-option.selected {
+      background: rgba(0, 184, 148, 0.2);
+      color: var(--accent);
+    }
+
+    /* 原生select隐藏 */
+    .native-select {
+      display: none;
     }
 
     input,
@@ -699,24 +724,43 @@
 
         <div class="input-group">
           <label><i class="fas fa-tv"></i> 选择平台</label>
-          <div class="select-wrapper">
-            <select id="platform">
+          <div class="custom-select" id="platformSelect">
+            <select id="platform" class="native-select">
               <option value="" disabled selected>请选择平台</option>
               <option value="bilibili">B站</option>
               <option value="douyin">抖音</option>
               <option value="kuaishou">快手</option>
             </select>
+            <div class="select-header">
+              <span id="platformValue">请选择平台</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="select-options">
+              <div class="select-option" data-value="" disabled>请选择平台</div>
+              <div class="select-option" data-value="bilibili">B站</div>
+              <div class="select-option" data-value="douyin">抖音</div>
+              <div class="select-option" data-value="kuaishou">快手</div>
+            </div>
           </div>
         </div>
 
         <div class="input-group">
           <label><i class="fas fa-chart-line"></i> 选择推广类型</label>
-          <div class="select-wrapper">
-            <select id="orderType">
+          <div class="custom-select" id="orderTypeSelect">
+            <select id="orderType" class="native-select">
               <option value="" disabled selected>请选择类型</option>
               <option value="play">播放量</option>
               <option value="like">点赞数</option>
             </select>
+            <div class="select-header">
+              <span id="orderTypeValue">请选择类型</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="select-options">
+              <div class="select-option" data-value="" disabled>请选择类型</div>
+              <div class="select-option" data-value="play">播放量</div>
+              <div class="select-option" data-value="like">点赞数</div>
+            </div>
           </div>
         </div>
 
@@ -741,12 +785,21 @@
 
         <div class="input-group">
           <label><i class="fas fa-coins"></i> 选择支付代币</label>
-          <div class="select-wrapper">
-            <select id="paymentToken">
+          <div class="custom-select" id="paymentTokenSelect">
+            <select id="paymentToken" class="native-select">
               <option value="" disabled selected>请选择支付方式</option>
               <option value="bnb">BNB</option>
               <option value="usdt">USDT</option>
             </select>
+            <div class="select-header">
+              <span id="paymentTokenValue">请选择支付方式</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="select-options">
+              <div class="select-option" data-value="" disabled>请选择支付方式</div>
+              <div class="select-option" data-value="bnb">BNB</div>
+              <div class="select-option" data-value="usdt">USDT</div>
+            </div>
           </div>
           <div class="info-box" id="likeWarning" style="display: none;">
             <p style="color: #ff6b6b;"><i class="fas fa-exclamation-circle"></i> 注意：点赞订单仅支持BNB支付！</p>
@@ -1015,19 +1068,26 @@
     const walletName = document.getElementById('walletName');
     const networkInfo = document.getElementById('networkInfo');
     const balanceInfo = document.getElementById('balanceInfo');
-    const platformSelect = document.getElementById('platform');
-    const orderTypeSelect = document.getElementById('orderType');
     const amountInput = document.getElementById('amount');
     const videoUrlInput = document.getElementById('videoUrl');
     const unitDisplay = document.getElementById('unitDisplay');
     const minAmountDisplay = document.getElementById('minAmount');
     const unitInfoDisplay = document.getElementById('unitInfo');
-    const paymentTokenSelect = document.getElementById('paymentToken');
     const likeWarning = document.getElementById('likeWarning');
     const paymentAmountDisplay = document.getElementById('paymentAmount');
     const paymentTokenDisplay = document.getElementById('paymentTokenDisplay');
     const orderStatusDisplay = document.getElementById('orderStatus');
     const createOrderBtn = document.getElementById('createOrderBtn');
+    
+    // 原生select元素（已隐藏）
+    const platformSelect = document.getElementById('platform');
+    const orderTypeSelect = document.getElementById('orderType');
+    const paymentTokenSelect = document.getElementById('paymentToken');
+
+    // 自定义选择器元素
+    const platformValue = document.getElementById('platformValue');
+    const orderTypeValue = document.getElementById('orderTypeValue');
+    const paymentTokenValue = document.getElementById('paymentTokenValue');
 
     // 全局变量
     let provider;
@@ -1042,14 +1102,93 @@
       connectWalletBtn.addEventListener('click', connectWallet);
       disconnectWalletBtn.addEventListener('click', disconnectWallet);
 
-      platformSelect.addEventListener('change', updateUnit);
-      orderTypeSelect.addEventListener('change', updateUnit);
-      paymentTokenSelect.addEventListener('change', updatePaymentToken);
+      // 设置自定义下拉菜单事件
+      setupCustomSelects();
+      
       amountInput.addEventListener('input', calculatePayment);
       createOrderBtn.addEventListener('click', createOrder);
 
       // 尝试自动连接钱包
       await autoConnectWallet();
+    }
+
+    // 设置自定义下拉菜单
+    function setupCustomSelects() {
+      const selects = document.querySelectorAll('.custom-select');
+      
+      selects.forEach(select => {
+        const header = select.querySelector('.select-header');
+        const options = select.querySelector('.select-options');
+        const optionsList = select.querySelectorAll('.select-option');
+        const nativeSelect = select.querySelector('.native-select');
+        
+        // 点击头部打开/关闭下拉菜单
+        header.addEventListener('click', function(e) {
+          e.stopPropagation();
+          
+          // 关闭所有其他下拉菜单
+          document.querySelectorAll('.select-options').forEach(opt => {
+            if (opt !== options) {
+              opt.classList.remove('open');
+              opt.previousElementSibling.classList.remove('open');
+            }
+          });
+          
+          // 切换当前下拉菜单
+          const isOpen = options.classList.toggle('open');
+          header.classList.toggle('open', isOpen);
+        });
+        
+        // 点击选项
+        optionsList.forEach(option => {
+          if (!option.hasAttribute('disabled')) {
+            option.addEventListener('click', function() {
+              const value = this.getAttribute('data-value');
+              const text = this.textContent;
+              
+              // 更新显示值
+              const valueSpan = header.querySelector('span');
+              valueSpan.textContent = text;
+              
+              // 更新原生select
+              nativeSelect.value = value;
+              
+              // 移除其他选项的选中状态
+              optionsList.forEach(opt => opt.classList.remove('selected'));
+              // 添加当前选项的选中状态
+              this.classList.add('selected');
+              
+              // 关闭下拉菜单
+              options.classList.remove('open');
+              header.classList.remove('open');
+              
+              // 触发变更事件
+              const event = new Event('change');
+              nativeSelect.dispatchEvent(event);
+              
+              // 更新UI
+              if (nativeSelect.id === 'platform' || nativeSelect.id === 'orderType') {
+                updateUnit();
+              } else if (nativeSelect.id === 'paymentToken') {
+                updatePaymentToken();
+              }
+            });
+          }
+        });
+      });
+      
+      // 点击页面其他位置关闭所有下拉菜单
+      document.addEventListener('click', function() {
+        document.querySelectorAll('.select-options').forEach(options => {
+          options.classList.remove('open');
+          options.previousElementSibling.classList.remove('open');
+        });
+      });
+      
+      // 监听原生select的change事件
+      platformSelect.addEventListener('change', updateUnit);
+      orderTypeSelect.addEventListener('change', updateUnit);
+      paymentTokenSelect.addEventListener('change', updatePaymentToken);
     }
 
     // 自动连接钱包
@@ -1181,6 +1320,7 @@
       if (orderType === 'like') {
         likeWarning.style.display = 'block';
         paymentTokenSelect.value = 'bnb';
+        paymentTokenValue.textContent = "BNB";
         paymentTokenSelect.disabled = true;
       } else {
         likeWarning.style.display = 'none';
